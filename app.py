@@ -53,6 +53,7 @@ def precipitation():
         prcp_dict["date"] = date
         prcp_dict["prcp"] = prcp
         all_prcp.append(prcp_dict)
+
     return jsonify(all_prcp)
 
 @app.route("/api/v1.0/stations")
@@ -61,13 +62,14 @@ def stations():
     session = Session(engine)
     """Return a list of passenger data including the name, age, and sex of each passenger"""
     # Query all stations
-    results = session.query(station.station).all()
+    results = session.query(station.name).all()
     session.close()
 
     # Create a dictionary from the row data and append to a list of all_passengers
-   all_stations = list(np.ravel(results)
+    all_stations = list(np.ravel(results))
 
     return jsonify(all_stations)
+
 if __name__ == '__main__':
     app.run(debug=True)
 
