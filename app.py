@@ -35,8 +35,9 @@ def welcome():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/<start><br/>"
+        f"/api/v1.0/<start>/<end>"
     )
-
 
 @app.route("/api/v1.0/names")
 def precipitation():
@@ -95,6 +96,54 @@ def tobs():
         all_tobs.append(temp_dict)
 
     return jsonify(all_tobs)
+
+
+@app.route("/api/v1.0/<start>")
+def start(start):
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+    #query start to current tmin, tavg, and tmax
+    from_start = session.query(measurement.date, func.min(measurement.tobs),\
+        func.avg(measurement.tobs),func.max(measurement.tobs)).\
+        filter(measurement.date >= start).\
+        group_by(measurement.date).all()
+    #create dict
+    start_temp = []
+    for date, min, avg, max in from_start:
+        start_temp_dict = {}
+        start_temp_dict["Date"] = date
+        start_temp_dict["TMIN"] = min
+        start_temp_dict["TAVG"] = avg
+        start_temp_dict["TMAX"] = max
+        start_temp.append(start_temp_dict)
+    session.close()
+    #jsonify
+    return jsonify(start_temp_dict)
+
+
+@app.route("/api/v1.0/<start>/<end>")
+def start_end(start, end):
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+    #query start date to end date tmin, tavg, and tmax
+    between_dates = session.query(measurement.date, func.min(measurement.tobs),\
+        func.avg(measurement.tobs),\
+        func.max(measurement.tobs)).\
+        filter(measurement.date >= start).\
+        filter(measurement.date <= end).\
+        group_by(measurement.date).all()
+    #create dict
+    start_end_temp = []
+    for date, min, avg, max in start_end:
+        start_end_temp_dict = {}
+        start_end_temp_dict["Date"] = date
+        start_end_temp_dict["TMIN"] = min
+        start_end_temp_dict["TAVG"] = avg
+        start_end_temp_dict["TMAX"] = max
+        start_end_temp.append(start_end_temp_dict)
+    session.close()
+    #jsonify
+    return jsonify(start_end)
 
 if __name__ == '__main__':
     app.run(debug=True)
