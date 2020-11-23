@@ -1,4 +1,3 @@
-
 sqlalchemy-challenge
 
 #For this project I was asked to analyze the following:#
